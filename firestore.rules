@@ -1,0 +1,131 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidUsername(username) {
+      return username.size() >= 3
+        && username.size() <= 20
+        && username.matches('^[a-zA-Z0-9_]+$');
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Allow public read for username availability checks and leaderboards
+      // User profiles contain only public info (username, level, stats)
+      allow read: if true;
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['email', 'username'])
+        && isValidUsername(request.resource.data.username);
+      allow update: if isOwner(userId)
+        // battleStats/friendCode are server-only (via Cloud Functions)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['battleStats', 'friendCode'])
+        // unlockedAchievements allows only additions (arrayUnion), not removals
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['unlockedAchievements'])
+          || request.resource.data.unlockedAchievements.toSet()
+            .hasAll(resource.data.unlockedAchievements.toSet()))
+        // Cap XP gain to 100 per write (max realistic per-question award)
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['totalXp'])
+          || (request.resource.data.totalXp - resource.data.totalXp) <= 100
+          && (request.resource.data.totalXp - resource.data.totalXp) >= 0)
+        // Level can only increase by 1 per write and only if XP justifies it
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['level'])
+          || (request.resource.data.level >= resource.data.level
+          && request.resource.data.level <= resource.data.level + 1));
+      allow delete: if false;
+
+      // User answers subcollection - tracks answered questions
+      match /answers/{questionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.keys().hasAll(['questionId', 'answeredAt', 'isCorrect', 'selectedChoiceIndex']);
+        allow update: if false; // Answers are immutable once recorded
+        allow delete: if false;
+      }
+    }
+
+    // Generation logs - tracks batch generation runs (Cloud Functions only)
+    match /generationLogs/{logId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Questions collection (read-only for clients)
+    match /questions/{questionId} {
+      allow read: if true; // Allow reading without auth for guest mode and testing
+      allow write: if false; // Only Cloud Functions can write questions
+    }
+
+    // User answers collection
+    match /userAnswers/{answerId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Achievements collection (read-only for clients)
+    match /achievements/{achievementId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Leaderboards collection
+    match /leaderboards/{leaderboardId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only Cloud Functions can write
+
+      match /entries/{userId} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Only Cloud Functions can write
+      }
+    }
+
+    // Widget tips collection (read-only)
+    match /widgetTips/{tipId} {
+      allow read: if true; // Public read for widget
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Battle results (stored after battle completion)
+    match /battleResults/{battleId} {
+      allow read: if isAuthenticated()
+        && (resource.data.player1Id == request.auth.uid
+            || resource.data.player2Id == request.auth.uid);
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Friendships collection
+    match /friendships/{friendshipId} {
+      // Users can read friendships they are part of
+      allow read: if isAuthenticated()
+        && (resource.data.user1Id == request.auth.uid
+            || resource.data.user2Id == request.auth.uid);
+      // Only Cloud Functions can create/modify friendships
+      // This prevents manipulation of friend status or fake requests
+      allow write: if false;
+    }
+
+    // Matchmaking logs (rate limiting - server-only)
+    match /matchmakingLogs/{logId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Notification logs (server-only writes, users can read their own)
+    match /notificationLogs/{logId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+  }
+}

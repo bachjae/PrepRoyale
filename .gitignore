@@ -1,0 +1,62 @@
+# .gitignore for Flutter and Firebase
+
+# Signing keys — never commit these
+android/key.properties
+*.jks
+*.keystore
+
+# Flutter
+# General
+.gradle/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+ios/.generated/
+ios/Flutter/Generated.xcframework/
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.podspec
+ios/Flutter/App.framework
+ios/Flutter/App.podspec
+ios/Flutter/App.zip
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.zip
+ios/ServiceDefinitions.json
+android/app/src/main/res/values/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/generated_plugin_registrant.dart
+
+# Firebase
+firebase-debug.log
+firebase-hosting-source.tgz
+.firebase/
+functions/node_modules/
+functions/lib/
+remotion/node_modules/
+remotion/out/
+remotion/.remotion/
+functions/npm-debug.log
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Firebase Functions secrets
+functions/.env
+functions/.env.local
+
+# Firebase service account keys (NEVER commit these — full admin access)
+*firebase-adminsdk*.json
+*service-account*.json
+
+# google-services.json at repo root (the real one lives in android/app/)
+/google-services.json

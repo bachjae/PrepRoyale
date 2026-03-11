@@ -1,0 +1,4 @@
+14:22:51.072 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+14:22:51.737 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+14:23:14.114 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - sat-act-battle-royale-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 430ms, init: 0ms
+14:23:14.490 [NamespaceSystem-blocking-namespace-operation-dispatcher-7] INFO com.firebase.core.namespace.StateManager - Namespace sat-act-battle-royale-default-rtdb status Active to Active

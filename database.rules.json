@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "matchmaking": {
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $userId"
+      }
+    },
+    "battles": {
+      "$battleId": {
+        ".read": "auth != null && (data.child('player1/id').val() == auth.uid || data.child('player2/id').val() == auth.uid)",
+        ".write": false
+      }
+    },
+    "pendingBattleInvites": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId"
+      }
+    },
+    "userBattles": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId"
+      }
+    },
+    "widgetData": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId"
+      }
+    }
+  }
+}

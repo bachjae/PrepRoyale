@@ -1,0 +1,26 @@
+{
+  "name": "prep-royale-promo",
+  "version": "1.0.0",
+  "description": "Prep Royale SAT/ACT Battle Royale - Promotional Video",
+  "scripts": {
+    "preview": "remotion preview src/index.ts",
+    "render:promo": "remotion render src/index.ts PrepRoyalePromo --output out/promo.mp4 --codec=h264 --jpeg-quality=80",
+    "render:short": "remotion render src/index.ts PrepRoyaleShort --output out/promo-short.mp4 --codec=h264 --jpeg-quality=80",
+    "render:promo:hq": "remotion render src/index.ts PrepRoyalePromo --output out/promo-hq.mp4 --codec=h264 --crf=14"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.288",
+    "@remotion/google-fonts": "^4.0.432",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remotion": "4.0.288"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.4.0"
+  },
+  "remotion": {
+    "entryPoint": "src/index.ts"
+  }
+}

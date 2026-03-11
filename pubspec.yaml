@@ -1,0 +1,76 @@
+name: prep_royale
+description: Prep Royale - AI-powered test prep with real-time battles.
+publish_to: "none"
+version: 1.0.0+2
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^14.0.0
+
+  # Firebase
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  google_sign_in: ^6.2.1
+  cloud_firestore: ^5.6.12
+  firebase_database: ^11.3.5
+  firebase_storage: ^12.4.10
+  firebase_messaging: ^15.2.10
+
+  # Images
+  cached_network_image: ^3.4.1
+  image_picker: ^1.2.1
+
+  # Widgets & Background
+  home_widget: ^0.7.0
+  workmanager: ^0.6.0
+
+  # HTTP (direct Cloud Functions calls, bypasses Firebase callable SDK)
+  http: ^1.0.0
+
+  # Utils
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  equatable: ^2.0.7
+  google_fonts: ^8.0.1
+  flutter_svg: ^2.2.3
+  shared_preferences: ^2.5.0
+  flutter_markdown: ^0.7.4+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  riverpod_generator: ^2.6.5
+  build_runner: ^2.5.4
+  json_serializable: ^6.9.0
+  flutter_launcher_icons: ^0.14.1
+
+  # Testing
+  mocktail: ^1.0.4
+  fake_cloud_firestore: ^3.0.3
+  firebase_auth_mocks: ^0.14.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/avatars/
+    - assets/legal/privacy_policy.md
+    - assets/legal/terms_of_service.md
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "App Icon.jpg"
+  adaptive_icon_background: "#4A90E2"
+  adaptive_icon_foreground: "App Icon.jpg"

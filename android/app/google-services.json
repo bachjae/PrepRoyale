@@ -1,0 +1,85 @@
+{
+  "project_info": {
+    "project_number": "722112363962",
+    "firebase_url": "https://sat-act-battle-royale-default-rtdb.firebaseio.com",
+    "project_id": "sat-act-battle-royale",
+    "storage_bucket": "sat-act-battle-royale.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722112363962:android:7803d378e1c44ee4863183",
+        "android_client_info": {
+          "package_name": "com.example.sat_act_battle_royale"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722112363962-ufr59p5bnsdejv6n1fttnonuuhijo2ro.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sat_act_battle_royale",
+            "certificate_hash": "c5dae957b229d921757fa9013cb4687c9fda5f65"
+          }
+        },
+        {
+          "client_id": "722112363962-1ln0t1a9akidetepl2lop52nmoq00jg1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDflI82-vGURsAY_D9ILccZ-mSGrOy15Cg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722112363962-1ln0t1a9akidetepl2lop52nmoq00jg1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722112363962:android:7f7daeac76cc11c3863183",
+        "android_client_info": {
+          "package_name": "com.preproyale.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722112363962-l49501fimsup2ufeqrnpsbd9bqmn5a6v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.preproyale.app",
+            "certificate_hash": "c5dae957b229d921757fa9013cb4687c9fda5f65"
+          }
+        },
+        {
+          "client_id": "722112363962-1ln0t1a9akidetepl2lop52nmoq00jg1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDflI82-vGURsAY_D9ILccZ-mSGrOy15Cg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722112363962-1ln0t1a9akidetepl2lop52nmoq00jg1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
