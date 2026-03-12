@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +10,7 @@ import 'config/firebase_config.dart';
 import 'services/widget_service.dart';
 import 'services/notification_service.dart';
 
-/// Background message handler for FCM (must be top-level function)
+/// Background message handler for FCM (native platforms only — web uses service worker)
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await FirebaseConfig.initialize();
@@ -19,27 +20,30 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  // Draw behind system navigation bar so SafeArea handles insets correctly
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  // Orientation lock is mobile-only (no-op on web but wrapped for clarity)
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
   // Initialize Firebase with proper configuration
   await FirebaseConfig.initialize();
 
-  // Register background message handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Register background message handler — native only; web uses firebase-messaging-sw.js
+  if (!kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
 
   // Create a ProviderContainer to access providers before the widget tree is built
   final container = ProviderContainer();
 
-  // Initialize widget service for home screen widgets (WorkManager + HomeWidget)
-  // This now uses the provider which handles the Ref dependency correctly
-  await container.read(widgetServiceProvider).initialize();
+  // Initialize widget service for home screen widgets (mobile only)
+  if (!kIsWeb) {
+    await container.read(widgetServiceProvider).initialize();
+  }
 
   runApp(
     UncontrolledProviderScope(

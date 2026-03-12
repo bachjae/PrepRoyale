@@ -1,9 +1,11 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../config/router.dart';
 import '../../config/theme.dart';
@@ -25,7 +27,7 @@ class ProfilePictureSelector extends ConsumerStatefulWidget {
 
 class _ProfilePictureSelectorState extends ConsumerState<ProfilePictureSelector> {
   String? _selectedPreset;
-  File? _selectedFile;
+  XFile? _selectedFile; // XFile is cross-platform (works on web + mobile)
   bool _isLoading = false;
 
   @override
@@ -197,7 +199,13 @@ class _ProfilePictureSelectorState extends ConsumerState<ProfilePictureSelector>
 
   Widget _buildSelectedImage() {
     if (_selectedFile != null) {
-      return Image.file(_selectedFile!, fit: BoxFit.cover);
+      // Web: XFile.path is a blob URL — use Image.network
+      // Native: XFile.path is a file system path — use Image.file
+      if (kIsWeb) {
+        return Image.network(_selectedFile!.path, fit: BoxFit.cover);
+      } else {
+        return Image.file(File(_selectedFile!.path), fit: BoxFit.cover);
+      }
     } else if (_selectedPreset != null) {
       return CachedNetworkImage(
         imageUrl: _selectedPreset!,
