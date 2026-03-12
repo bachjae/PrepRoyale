@@ -160,7 +160,7 @@ class AuthController {
       final isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
 
       // Helper to build username from Google profile
-      String _buildUsername() {
+      String buildUsername() {
         final email = userCredential.user!.email ?? '';
         final displayName = userCredential.user!.displayName ?? '';
         return displayName.isNotEmpty
@@ -170,7 +170,7 @@ class AuthController {
 
       if (isNewUser) {
         // Brand new Firebase Auth account — always create the Firestore document
-        String username = _buildUsername();
+        String username = buildUsername();
         if (!await _firebaseService.isUsernameAvailable(username)) {
           username = '${username}_${DateTime.now().millisecondsSinceEpoch % 10000}';
         }
@@ -185,7 +185,7 @@ class AuthController {
         // (edge case: auth record exists but doc was never created or was deleted)
         final existingUser = await _firebaseService.getUser(userCredential.user!.uid);
         if (existingUser == null) {
-          String username = _buildUsername();
+          String username = buildUsername();
           if (!await _firebaseService.isUsernameAvailable(username)) {
             username = '${username}_${DateTime.now().millisecondsSinceEpoch % 10000}';
           }

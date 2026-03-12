@@ -236,7 +236,7 @@ class WidgetService {
   Future<void> _handleWidgetAction(Uri? uri) async {
     if (uri == null) return;
 
-    print('Widget action received: $uri');
+    debugPrint('Widget action received: $uri');
 
     // When the app is already open and the widget is tapped,
     // navigate to the study mode selector.
@@ -251,7 +251,7 @@ class WidgetService {
     } catch (e) {
       // Router not ready yet (app is still initializing) — the system
       // deep link handler will open the app to the correct screen.
-      print('Widget navigation deferred to system handler: $e');
+      debugPrint('Widget navigation deferred to system handler: $e');
     }
   }
 
@@ -286,7 +286,7 @@ class WidgetService {
         androidName: androidWidgetName,
       );
     } catch (e) {
-      print('Error updating widget: $e');
+      debugPrint('Error updating widget: $e');
     }
   }
 
@@ -307,7 +307,7 @@ class WidgetService {
         androidName: androidWidgetName,
       );
     } catch (e) {
-      print('Error updating widget streak: $e');
+      debugPrint('Error updating widget streak: $e');
     }
   }
 
@@ -505,7 +505,7 @@ void callbackDispatcher() {
             androidName: 'SATACTWidgetProvider',
           );
         } catch (e) {
-          print('Background task error: $e');
+          debugPrint('Background task error: $e');
         }
         break;
     }
