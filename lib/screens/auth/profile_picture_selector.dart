@@ -28,6 +28,7 @@ class ProfilePictureSelector extends ConsumerStatefulWidget {
 class _ProfilePictureSelectorState extends ConsumerState<ProfilePictureSelector> {
   String? _selectedPreset;
   XFile? _selectedFile; // XFile is cross-platform (works on web + mobile)
+  Uint8List? _webImageBytes; // Cached bytes for web preview (blob URLs are unreliable)
   bool _isLoading = false;
 
   @override
@@ -199,14 +200,15 @@ class _ProfilePictureSelectorState extends ConsumerState<ProfilePictureSelector>
 
   Widget _buildSelectedImage() {
     if (_selectedFile != null) {
-      // Web: XFile.path is a blob URL — use Image.network
-      // Native: XFile.path is a file system path — use Image.file
-      if (kIsWeb) {
-        return Image.network(_selectedFile!.path, fit: BoxFit.cover);
-      } else {
+      // Web: use pre-read bytes (blob URLs are unreliable across browsers)
+      // Native: use file system path
+      if (kIsWeb && _webImageBytes != null) {
+        return Image.memory(_webImageBytes!, fit: BoxFit.cover);
+      } else if (!kIsWeb) {
         return Image.file(File(_selectedFile!.path), fit: BoxFit.cover);
       }
-    } else if (_selectedPreset != null) {
+    }
+    if (_selectedPreset != null) {
       return CachedNetworkImage(
         imageUrl: _selectedPreset!,
         fit: BoxFit.cover,
@@ -229,8 +231,10 @@ class _ProfilePictureSelectorState extends ConsumerState<ProfilePictureSelector>
     final storageService = ref.read(storageServiceProvider);
     final file = await storageService.pickFromGallery();
     if (file != null) {
+      final bytes = kIsWeb ? await file.readAsBytes() : null;
       setState(() {
         _selectedFile = file;
+        _webImageBytes = bytes;
         _selectedPreset = null;
       });
     }
@@ -240,8 +244,10 @@ class _ProfilePictureSelectorState extends ConsumerState<ProfilePictureSelector>
     final storageService = ref.read(storageServiceProvider);
     final file = await storageService.pickFromCamera();
     if (file != null) {
+      final bytes = kIsWeb ? await file.readAsBytes() : null;
       setState(() {
         _selectedFile = file;
+        _webImageBytes = bytes;
         _selectedPreset = null;
       });
     }

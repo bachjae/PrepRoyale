@@ -23,7 +23,8 @@
     "rules": "database.rules.json"
   },
   "storage": {
-    "rules": "storage.rules"
+    "rules": "storage.rules",
+    "postdeploy": "gsutil cors set storage.cors.json gs://sat-act-battle-royale.firebasestorage.app"
   },
   "extensions": {},
   "emulators": {
