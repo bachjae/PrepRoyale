@@ -37,8 +37,13 @@ class NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
-        // Get FCM token
-        _fcmToken = await _firebaseMessaging.getToken();
+        // Get FCM token (web requires VAPID key for push subscription)
+        _fcmToken = kIsWeb
+            ? await _firebaseMessaging.getToken(
+                vapidKey:
+                    'BNm2CtxV0arwHuO2Fh-q3ai8GcmaiNQzmo-DajZaIymEvEPM1dQHJcqk_uha5AvdoicCq0uo0unx-4Jt7Aa2F8M',
+              )
+            : await _firebaseMessaging.getToken();
 
         if (_fcmToken != null) {
           // Save token to Firestore

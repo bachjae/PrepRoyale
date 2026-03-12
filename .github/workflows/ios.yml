@@ -1,0 +1,143 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [master, main, clean-master]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+jobs:
+  build-ios:
+    name: Build & Archive iOS
+    runs-on: macos-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Restore GoogleService-Info.plist from GitHub Secret ───────────────
+      # In your repo: Settings → Secrets → Actions → New secret
+      #   Name:  GOOGLE_SERVICE_INFO_PLIST
+      #   Value: base64-encoded content of ios/Runner/GoogleService-Info.plist
+      # Generate the value with: base64 -i ios/Runner/GoogleService-Info.plist
+      - name: Restore GoogleService-Info.plist
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+
+      # ── 3. Flutter setup ─────────────────────────────────────────────────────
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      # ── 3. CocoaPods ─────────────────────────────────────────────────────────
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: pods-
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install --repo-update
+        env:
+          # Silence CocoaPods analytics
+          COCOAPODS_DISABLE_STATS: 'true'
+
+      # ── 4. Static analysis (catches Dart errors before building) ──────────────
+      - name: Dart analyze
+        run: dart analyze lib/
+
+      # ── 5. Build (unsigned — no Apple Developer account required) ─────────────
+      - name: Build iOS (no codesign)
+        run: |
+          flutter build ios --release --no-codesign
+
+      # ── 6. Archive the .app for download ─────────────────────────────────────
+      - name: Archive .app
+        run: |
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r "build/ios/iphoneos/Runner.app" "build/ios/iphoneos/Payload/"
+          cd build/ios/iphoneos
+          zip -r PrepRoyale-unsigned.ipa Payload/
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrepRoyale-unsigned-ipa
+          path: build/ios/iphoneos/PrepRoyale-unsigned.ipa
+          retention-days: 14
+
+  # ── Optional: signed build for TestFlight (requires Apple Developer account) ──
+  # Uncomment this job once you have:
+  #   1. Apple Developer account ($99/yr)
+  #   2. Distribution certificate exported as .p12
+  #   3. App Store provisioning profile (.mobileprovision)
+  #   4. The following GitHub Secrets set:
+  #        BUILD_CERTIFICATE_BASE64  — base64-encoded .p12 file
+  #        P12_PASSWORD              — password for the .p12
+  #        BUILD_PROVISION_PROFILE_BASE64 — base64-encoded .mobileprovision
+  #        KEYCHAIN_PASSWORD         — any random string (used for temp keychain)
+  #        APPLE_ID                  — your Apple ID email
+  #        APPLE_APP_SPECIFIC_PASSWORD — App-specific password from appleid.apple.com
+  #        TEAM_ID                   — your 10-char Apple Team ID
+
+  # build-ios-signed:
+  #   name: Build & Upload to TestFlight
+  #   runs-on: macos-latest
+  #   needs: build-ios
+  #   if: github.ref == 'refs/heads/master'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with: { channel: stable, cache: true }
+  #     - run: flutter pub get
+  #     - run: cd ios && pod install --repo-update
+  #
+  #     - name: Install signing certificate
+  #       run: |
+  #         CERTIFICATE_PATH=$RUNNER_TEMP/cert.p12
+  #         KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
+  #         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+  #         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+  #         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+  #         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+  #         security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+  #         security list-keychain -d user -s $KEYCHAIN_PATH
+  #       env:
+  #         BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+  #         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+  #         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+  #
+  #     - name: Install provisioning profile
+  #       run: |
+  #         PP_PATH=$RUNNER_TEMP/profile.mobileprovision
+  #         echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+  #         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+  #         cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+  #       env:
+  #         BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+  #
+  #     - name: Build signed IPA
+  #       run: flutter build ipa --release
+  #
+  #     - name: Upload to TestFlight
+  #       run: |
+  #         xcrun altool --upload-app \
+  #           --type ios \
+  #           --file build/ios/ipa/prep_royale.ipa \
+  #           --username "$APPLE_ID" \
+  #           --password "$APPLE_APP_SPECIFIC_PASSWORD"
+  #       env:
+  #         APPLE_ID: ${{ secrets.APPLE_ID }}
+  #         APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}

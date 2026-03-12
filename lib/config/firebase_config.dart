@@ -9,9 +9,9 @@ class FirebaseConfig {
   static const bool useEmulators = false;
 
   // Android emulator uses 10.0.2.2 to reach host's localhost
-  // iOS simulator and physical devices use different addresses
+  // iOS simulator, web, and physical devices use localhost
   static String get emulatorHost {
-    if (defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return '10.0.2.2';
     }
     return 'localhost';
@@ -47,8 +47,18 @@ class FirebaseConfig {
   }
 
   static FirebaseOptions get defaultPlatformOptions {
+    // Web
     if (kIsWeb) {
-      throw UnsupportedError('Web platform is not supported');
+      return const FirebaseOptions(
+        apiKey: 'AIzaSyC6UP3Jw0mQaotu9SehVrGOpmKmBbFt0ck',
+        appId: '1:722112363962:web:29ea13456da379ce863183',
+        messagingSenderId: '722112363962',
+        projectId: 'sat-act-battle-royale',
+        storageBucket: 'sat-act-battle-royale.firebasestorage.app',
+        authDomain: 'sat-act-battle-royale.firebaseapp.com',
+        databaseURL: 'https://sat-act-battle-royale-default-rtdb.firebaseio.com',
+        measurementId: 'G-4J4PY4QV6D',
+      );
     }
 
     switch (defaultTargetPlatform) {
@@ -61,14 +71,14 @@ class FirebaseConfig {
           storageBucket: 'sat-act-battle-royale.firebasestorage.app',
         );
       case TargetPlatform.iOS:
-        // iOS not configured yet - add iOS app in Firebase Console if needed
         return const FirebaseOptions(
-          apiKey: 'AIzaSyDflI82-vGURsAY_D9ILccZ-mSGrOy15Cg',
-          appId: '1:722112363962:android:7803d378e1c44ee4863183',
+          apiKey: 'AIzaSyASvzXUG4MB2oldjqQ05tBdbtb7bvHuNek',
+          appId: '1:722112363962:ios:1276e504f21eb18a863183',
           messagingSenderId: '722112363962',
           projectId: 'sat-act-battle-royale',
           storageBucket: 'sat-act-battle-royale.firebasestorage.app',
-          iosBundleId: 'com.example.satActApp',
+          databaseURL: 'https://sat-act-battle-royale-default-rtdb.firebaseio.com',
+          iosBundleId: 'com.preproyale.app',
         );
       default:
         throw UnsupportedError('Unsupported platform');

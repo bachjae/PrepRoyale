@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -126,7 +127,12 @@ class AuthController {
   Future<AuthResult> signInWithGoogle() async {
     try {
       // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      // Web requires the OAuth Web Client ID so the popup can redirect back
+      final GoogleSignInAccount? googleUser = await GoogleSignIn(
+        clientId: kIsWeb
+            ? '722112363962-1ln0t1a9akidetepl2lop52nmoq00jg1.apps.googleusercontent.com'
+            : null,
+      ).signIn();
 
       if (googleUser == null) {
         // User canceled the sign-in

@@ -1,7 +1,7 @@
 name: prep_royale
 description: Prep Royale - AI-powered test prep with real-time battles.
 publish_to: "none"
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -70,7 +70,7 @@ flutter:
 
 flutter_launcher_icons:
   android: true
-  ios: false
+  ios: true
   image_path: "App Icon.jpg"
   adaptive_icon_background: "#4A90E2"
   adaptive_icon_foreground: "App Icon.jpg"

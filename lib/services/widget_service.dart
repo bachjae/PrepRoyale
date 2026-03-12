@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -206,6 +207,8 @@ class WidgetService {
 
   // Initialize widget and background updates
   Future<void> initialize() async {
+    if (kIsWeb) return; // Home screen widgets are mobile-only
+
     // Initialize HomeWidget
     await HomeWidget.setAppGroupId(appGroupId);
 
@@ -254,6 +257,7 @@ class WidgetService {
 
   // Update widget data
   Future<void> updateWidget() async {
+    if (kIsWeb) return;
     try {
       // Get hourly tip
       final tip = await _getHourlyTip();
@@ -289,6 +293,7 @@ class WidgetService {
   /// Update just the streak value in the widget (optimized for frequent updates)
   /// Call this after completing a study session to keep the widget in sync
   Future<void> updateStreakOnly(int dailyStreak) async {
+    if (kIsWeb) return;
     try {
       await HomeWidget.saveWidgetData<int>('streak', dailyStreak);
       await HomeWidget.saveWidgetData<String>(
