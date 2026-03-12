@@ -44,11 +44,30 @@ functions/npm-debug.log
 .idea/
 *.iml
 *.iws
+prep_royale.iml
 
 # OS
 .DS_Store
 Thumbs.db
 nul
+
+# Claude Code local config (machine-specific, not for repo)
+.claude/settings.local.json
+.claude-flow/
+.mcp.json
+
+# Flutter create artifacts
+.metadata
+analysis_options.yaml
+
+# CocoaPods — commit Podfile but not resolved/built pods
+ios/Pods/
+ios/Podfile.lock
+
+# Xcode derived data
+ios/DerivedData/
+ios/*.xcuserstate
+ios/Runner.xcworkspace/xcuserdata/
 
 # Firebase Functions secrets
 functions/.env

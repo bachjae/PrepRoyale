@@ -1,227 +1,238 @@
-# SAT/ACT Battle Royale
+# Prep Royale
 
-A Flutter-based study app for SAT and ACT test preparation featuring AI-generated questions, real-time 1v1 battles, achievements, and leaderboards.
+AI-powered SAT/ACT test prep app with real-time head-to-head battles, study mode, leaderboards, and friends — available on **Android**, **iOS**, and **Web**.
 
-## Features
+---
 
-- **Email/Password Authentication** - Secure user accounts with profile management
-- **AI-Generated Questions** - GPT-4 powered SAT/ACT practice questions
-- **Study Mode** - Practice by test type (SAT/ACT) and section (Math, Reading, Writing, Science)
-- **Real-Time Battles** - 1v1 quiz battles with live scoring and matchmaking
-- **XP & Leveling** - Earn XP for answers and level up
-- **Streak Tracking** - Daily study streaks and accuracy streaks
-- **Achievements** - 14 unlockable achievements with bonus XP
-- **Leaderboards** - Global rankings by XP
-- **Profile Pictures** - Upload custom or choose from presets
-- **Home Screen Widgets** - iOS and Android widgets with tips and streak info
+## Platforms
 
-## Tech Stack
+| Platform | Status | Build |
+|---|---|---|
+| Android | Production-ready | `flutter build apk --release` |
+| iOS | Configured — build via GitHub Actions or Codemagic | `flutter build ios --release` (macOS only) |
+| Web | Production-ready | `flutter build web --release` |
 
-- **Frontend**: Flutter 3.16+
-- **State Management**: Riverpod
-- **Navigation**: go_router
-- **Backend**: Firebase (Auth, Firestore, Realtime Database, Storage, Functions)
-- **AI**: OpenAI GPT-4
+All three platforms share the same Firebase backend — battles, friends, leaderboard, and study progress are fully cross-platform.
+
+---
 
 ## Project Structure
 
 ```
-lib/
-├── config/
-│   ├── firebase_config.dart    # Firebase initialization
-│   ├── router.dart             # GoRouter configuration
-│   └── theme.dart              # Material 3 theme
-├── models/
-│   ├── user_model.dart         # User profile and stats
-│   ├── question_model.dart     # Questions and answers
-│   ├── battle_model.dart       # Battle state
-│   └── achievement_model.dart  # Achievements
-├── providers/
-│   ├── auth_provider.dart      # Authentication state
-│   ├── question_provider.dart  # Study session state
-│   ├── battle_provider.dart    # Battle state
-│   └── leaderboard_provider.dart # Leaderboard data
-├── services/
-│   ├── firebase_service.dart   # Firestore operations
-│   ├── storage_service.dart    # Image upload/storage
-│   ├── achievement_service.dart # Achievement logic
-│   └── widget_service.dart     # Home widget updates
-├── screens/
-│   ├── auth/                   # Login, Signup, Profile Picture
-│   ├── home/                   # Home screen
-│   ├── study/                  # Study mode flow
-│   ├── battle/                 # Battle lobby, game, results
-│   ├── profile/                # Profile, achievements
-│   └── leaderboard/            # Leaderboard
-├── widgets/
-│   └── common/                 # Reusable UI components
-└── main.dart                   # App entry point
-
-functions/
-└── src/
-    └── index.ts                # Cloud Functions
-
-android/app/src/main/
-├── kotlin/.../SATACTWidgetProvider.kt  # Android widget
-└── res/
-    ├── layout/widget_layout.xml        # Widget layout
-    └── xml/widget_info.xml             # Widget config
-
-ios/WidgetExtension/
-└── SATACTWidget.swift          # iOS widget (placeholder)
+Prep Royale/
+│
+├── 📱 android/                  # Android platform
+│   ├── app/build.gradle         # Package: com.preproyale.app, SDK 36
+│   └── app/src/main/            # Kotlin entry point, AndroidManifest
+│
+├── 🍎 ios/                      # iOS platform
+│   ├── Runner/
+│   │   ├── AppDelegate.swift    # Firebase init + plugin registration
+│   │   ├── Info.plist           # Bundle ID, URL schemes, permissions
+│   │   └── GoogleService-Info.plist  # (gitignored — stored as GH Secret)
+│   ├── Runner.xcodeproj/        # Xcode project (bundle: com.preproyale.app)
+│   └── Podfile                  # CocoaPods for Firebase native SDKs
+│
+├── 🌐 web/                      # Web platform (Flutter Web)
+│   ├── index.html               # App shell + FCM service worker registration
+│   ├── manifest.json            # PWA manifest
+│   └── firebase-messaging-sw.js # Background push notifications
+│
+├── lib/                         # Flutter/Dart source
+│   ├── config/
+│   │   ├── firebase_config.dart # Firebase options for all 3 platforms
+│   │   ├── router.dart          # GoRouter navigation (25+ routes)
+│   │   └── theme.dart           # Material 3 theme (Sky blue palette)
+│   ├── models/                  # Firestore-serializable data models
+│   ├── providers/               # Riverpod state management
+│   ├── screens/                 # Feature screens (auth, battle, study, profile…)
+│   ├── services/                # Firebase, cloud functions, notifications
+│   └── widgets/                 # Reusable UI components
+│
+├── functions/                   # Firebase Cloud Functions (TypeScript)
+│   └── src/index.ts             # 37 HTTP endpoints (matchmaking, battles, friends…)
+│
+├── .github/workflows/
+│   └── ios.yml                  # GitHub Actions: iOS build on macOS runner
+│
+├── firestore.rules              # Firestore security rules
+├── database.rules.json          # Realtime Database security rules
+└── firebase.json                # Firebase project config
 ```
 
-## Setup Instructions
+---
 
-### Prerequisites
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **UI / Mobile** | Flutter 3, Dart ≥3.2 |
+| **State** | Riverpod 2 (StreamProvider, StateNotifier) |
+| **Navigation** | GoRouter 14 |
+| **Auth** | Firebase Auth + Google Sign-In |
+| **Persistent data** | Firestore |
+| **Live battle state** | Firebase Realtime Database |
+| **Backend logic** | Firebase Cloud Functions (TypeScript, Node 18) |
+| **AI questions** | Vertex AI Gemini 2.0 Flash |
+| **Push notifications** | FCM (Android + iOS + Web) |
+| **Storage** | Firebase Storage (profile pictures) |
+
+---
+
+## Android
+
+**Package:** `com.preproyale.app`
+**Min SDK:** 21 · **Target SDK:** 36
+
+### Build
 
 ```bash
-flutter --version    # Need 3.16+
-firebase --version   # Need Firebase CLI
-node --version       # Need Node.js 18+
-```
-
-### 1. Clone and Install
-
-```bash
-cd sat_act_app
+# Install dependencies (Windows/OneDrive workaround — flutter clean causes file-lock errors)
+cd android && ./gradlew.bat --stop && cd .. && rm -rf build/
 flutter pub get
+
+# Run on device/emulator
+flutter run
+
+# Release APK
+flutter build apk --release
 ```
 
-### 2. Firebase Setup
+### Configuration
 
-1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Enable Authentication (Email/Password)
-3. Create Firestore Database
-4. Create Realtime Database
-5. Enable Cloud Storage
-6. Download config files:
-   - `google-services.json` → `android/app/`
-   - `GoogleService-Info.plist` → `ios/Runner/`
+- `android/app/google-services.json` — Firebase config (gitignored; add manually)
+- `android/key.properties` — Signing config (gitignored; required for release builds)
 
-### 3. Cloud Functions Setup
+---
+
+## iOS
+
+**Bundle ID:** `com.preproyale.app`
+**Minimum iOS:** 13.0
+
+> **Windows users:** iOS builds require macOS + Xcode. Use the GitHub Actions workflow below.
+
+### GitHub Actions Build (free)
+
+Every push to `master` automatically builds an unsigned IPA on a macOS runner.
+
+**One-time setup — add this GitHub Secret:**
+
+| Secret name | Value |
+|---|---|
+| `GOOGLE_SERVICE_INFO_PLIST` | Base64-encoded `GoogleService-Info.plist` |
+
+Generate the base64 value:
+```bash
+base64 -i ios/Runner/GoogleService-Info.plist | pbcopy   # macOS (copies to clipboard)
+base64 ios/Runner/GoogleService-Info.plist               # Linux/WSL
+```
+
+Then go to: **GitHub repo → Settings → Secrets and variables → Actions → New repository secret**
+
+The workflow produces a downloadable `PrepRoyale-unsigned.ipa` artifact (kept 14 days).
+
+### For App Store / TestFlight
+
+Uncomment the `build-ios-signed` job in [.github/workflows/ios.yml](.github/workflows/ios.yml) and add the Apple Developer secrets described in the workflow comments. Requires a $99/yr Apple Developer account.
+
+### Local build (macOS only)
+
+```bash
+cd ios && pod install
+flutter build ios --release
+```
+
+---
+
+## Web
+
+Deployed as a Flutter Web PWA. Works in any modern browser.
+
+### Run locally
+
+```bash
+flutter run -d chrome
+```
+
+### Production build
+
+```bash
+flutter build web --release
+# Output: build/web/ — deploy to Firebase Hosting, Vercel, or any static host
+```
+
+### Deploy to Firebase Hosting
+
+```bash
+firebase deploy --only hosting
+```
+
+> Add `"hosting"` config to `firebase.json` with `"public": "build/web"` first.
+
+### Push Notifications (Web)
+
+Background notifications use a service worker (`web/firebase-messaging-sw.js`). The browser will ask permission on first visit. Requires HTTPS in production (localhost is exempt).
+
+---
+
+## Backend — Firebase Cloud Functions
+
+Located in `functions/src/index.ts` (~2800 lines, 37 endpoints).
+
+All user-facing functions use `wrapAsCallable` (manual Bearer token auth). The client calls them via `lib/services/cloud_fn.dart`.
 
 ```bash
 cd functions
 npm install
-
-# Set OpenAI API key
-firebase functions:config:set openai.api_key="YOUR_OPENAI_API_KEY"
-
-# Deploy functions
-firebase deploy --only functions
+npm run build
+firebase deploy --only functions     # run from repo root
 ```
 
-### 4. Deploy Security Rules
+**Firebase project:** `sat-act-battle-royale`
+
+---
+
+## Environment Setup
+
+### Prerequisites
+
+- Flutter SDK (stable channel)
+- Node.js 18+ (for Cloud Functions)
+- Firebase CLI: `npm install -g firebase-tools`
+
+### First-time setup
 
 ```bash
-firebase deploy --only firestore:rules
-firebase deploy --only database
+flutter pub get
+firebase login
+firebase use sat-act-battle-royale
 ```
 
-### 5. Seed Initial Data
-
-After deploying functions, call these endpoints to seed data:
-- `https://YOUR_PROJECT.cloudfunctions.net/seedAchievements`
-- `https://YOUR_PROJECT.cloudfunctions.net/seedWidgetTips`
-
-### 6. Run the App
+### Run local Firebase emulators
 
 ```bash
-flutter run
+firebase emulators:start
+# Set useEmulators = true in lib/config/firebase_config.dart
 ```
 
-## Configuration
+---
 
-### Firebase Config
+## Pre-Launch Checklist
 
-Update `lib/config/firebase_config.dart` with your Firebase project values, or use FlutterFire CLI:
+**Deploy required:**
+- [ ] `firebase deploy --only functions,firestore:rules,database`
+- [ ] Set `ADMIN_SECRET` env var in Firebase Functions config
+- [ ] Set admin custom claim on your Firebase Auth account
+- [ ] Call `purgeKnownBrokenQuestions` once (removes 18 flagged Math questions)
+- [ ] Scan and delete Writing/English questions containing "underlined" references
 
-```bash
-flutterfire configure
-```
+**App Store / Play Store:**
+- [ ] Privacy Policy and Terms of Service (host externally, link in app)
+- [ ] iOS: Apple Developer account + distribution certificate for TestFlight
 
-### Android Widget
-
-The Android widget is pre-configured. Register the provider in your `AndroidManifest.xml`:
-
-```xml
-<receiver android:name=".SATACTWidgetProvider" android:exported="true">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-    </intent-filter>
-    <meta-data
-        android:name="android.appwidget.provider"
-        android:resource="@xml/widget_info" />
-</receiver>
-```
-
-### iOS Widget
-
-1. Open `ios/Runner.xcworkspace` in Xcode
-2. Add Widget Extension target
-3. Copy code from `ios/WidgetExtension/SATACTWidget.swift`
-4. Configure App Group: `group.com.example.satactapp`
-
-## Cloud Functions
-
-| Function | Type | Description |
-|----------|------|-------------|
-| `generateQuestions` | HTTPS Callable | Generate AI questions using GPT-4 |
-| `joinMatchmaking` | HTTPS Callable | Add user to battle queue |
-| `submitBattleAnswer` | HTTPS Callable | Submit answer during battle |
-| `updateLeaderboard` | Firestore Trigger | Update leaderboard on XP changes |
-| `getRandomTip` | HTTPS Callable | Get random study tip |
-| `seedWidgetTips` | HTTPS Request | Seed initial tips |
-| `seedAchievements` | HTTPS Request | Seed achievements |
-
-## Key Features
-
-### Study Mode Flow
-1. Select SAT or ACT
-2. Choose section (Math, Reading, Writing, Science)
-3. Answer questions with timer
-4. Get immediate feedback with explanation
-5. Earn XP (+10 correct, +5 incorrect)
-
-### Battle System
-1. Join matchmaking queue
-2. Match with player within ±3 levels
-3. Answer 5 questions (45s each)
-4. Score: 100 base + up to 50 speed bonus
-5. Winner gets 50 XP, loser gets 20 XP
-
-### Achievements
-- **Questions**: First Steps (10), Century (100), Dedicated (500), Master (1000)
-- **Streaks**: Week Warrior (7), Month Champion (30), Unstoppable (100)
-- **Accuracy**: Sharpshooter (10), Perfectionist (20), Flawless (50)
-- **Battles**: Battle Ready (1), Victor (10), Champion (50), Legend (100)
-
-## Cost Estimates
-
-### Monthly Operations (1,000 users)
-- Firebase: $25-50
-- OpenAI API: $20-40
-- **Total**: $45-90/month
-
-### Cost Optimization
-- Pre-generate questions to reduce OpenAI calls
-- Cache questions on client
-- Use Firestore offline persistence
-
-## Development
-
-### Run Tests
-```bash
-flutter test
-```
-
-### Build for Release
-```bash
-flutter build apk --release
-flutter build ios --release
-```
+---
 
 ## License
 
-MIT License
+Private — all rights reserved.
